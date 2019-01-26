@@ -90,11 +90,10 @@ class Textarea(InputStyleMixin, forms.widgets.Textarea):
 
 # Forms #######################################################################
 
-from django.forms.models import BaseModelForm, ModelFormMetaclass
-
 # FIXME restore after django-angular is fixed (SE-222)
+from django.forms.models import ModelForm, BaseModelForm, ModelFormMetaclass
 # class BetaTestApplicationForm(NgModelFormMixin, NgFormValidationMixin, NgModelForm):
-class BetaTestApplicationForm(BaseModelForm):
+class BetaTestApplicationForm(ModelForm):
     """
     Application form for beta testers. Creates instances of User, UserProfile,
     and BetaTestApplication models on submit.
@@ -185,17 +184,9 @@ class BetaTestApplicationForm(BaseModelForm):
     # validator is not copied over. We need to define the field manually so
     # that validation will work client-side. We do this by copying from the
     # model field (DRY).
-    _subdomain_field = Meta.model._meta.get_field('subdomain')
-    _subdomain_validator = next(v for v in _subdomain_field.validators
-                                if hasattr(v, 'regex'))
+    # FIXME restore original fields after SE-222 is done
     subdomain = forms.RegexField(
-        regex=_subdomain_validator.regex,
-        max_length=_subdomain_field.max_length,
-        label=capfirst(_subdomain_field.verbose_name),
-        help_text=_subdomain_field.help_text,
-        error_messages={
-            'invalid': _subdomain_validator.message,
-        },
+        regex=".*",
         widget=TextInput(attrs={
             'class': 'input input--host input--host--subdomain text-xs-right',
         }),
