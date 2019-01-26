@@ -30,9 +30,9 @@ from unittest.mock import patch
 from bs4 import BeautifulSoup
 from ddt import ddt, data, unpack
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from simple_email_confirmation.models import EmailAddress
 
 from instance.tests.models.factories.openedx_instance import OpenEdXInstanceFactory
