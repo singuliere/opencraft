@@ -15,20 +15,25 @@ coverage==4.2
 ddt==1.1.1
 debtcollector==1.9.0
 decorator==4.0.10
-Django==1.10.7
--e git+https://github.com/open-craft/django-angular.git@5f3e54f909b925eecb59dc4dd73b6e9fe27e9558#egg=django_angular
+# Django==1.10.7
+Django==2.1.5
+# FIXME close SE-222 first
+django-angular=2.2
+# -e git+https://github.com/open-craft/django-angular.git@5f3e54f909b925eecb59dc4dd73b6e9fe27e9558#egg=django_angular
 django-appconf==1.0.2
 django-compressor==2.1
 django-debug-toolbar==1.6
 django-environ==0.4.0
-django-extensions==1.7.4
+django-extensions==2.1.4
 django-filter==0.15.3
 django-grappelli==2.8.3
 django-libsass==0.7
 django-redis==4.6.0
-django-simple-email-confirmation==0.21
+# django-simple-email-confirmation==0.21
+django-simple-email-confirmation==0.23
 django-zurb-foundation==5.5.0
-djangorestframework==3.5.3
+# djangorestframework==3.5.3
+djangorestframework==3.9.1
 dodgy==0.1.9
 factory-boy==2.7.0
 fake-factory==0.7.2
@@ -89,7 +94,7 @@ positional==1.1.1
 prettytable==0.7.2
 prompt-toolkit==1.0.9
 prospector==0.12.4
-psycopg2==2.7.3.2
+psycopg2==2.7.7
 ptyprocess==0.5.1
 pycodestyle==2.0.0
 pydocstyle==1.0.0

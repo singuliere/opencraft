@@ -90,7 +90,11 @@ class Textarea(InputStyleMixin, forms.widgets.Textarea):
 
 # Forms #######################################################################
 
-class BetaTestApplicationForm(NgModelFormMixin, NgFormValidationMixin, NgModelForm):
+from django.forms.models import BaseModelForm, ModelFormMetaclass
+
+# FIXME restore after django-angular is fixed (SE-222)
+# class BetaTestApplicationForm(NgModelFormMixin, NgFormValidationMixin, NgModelForm):
+class BetaTestApplicationForm(BaseModelForm):
     """
     Application form for beta testers. Creates instances of User, UserProfile,
     and BetaTestApplication models on submit.
@@ -424,8 +428,10 @@ class BetaTestApplicationForm(NgModelFormMixin, NgFormValidationMixin, NgModelFo
         return users
 
 
-class LoginForm(NgFormValidationMixin, AuthenticationForm,
-                metaclass=NgDeclarativeFieldsMetaclass):
+class LoginForm(NgFormValidationMixin, AuthenticationForm):
+    # FIXME restore after django-angular is fixed (SE-222)
+    # , metaclass=NgDeclarativeFieldsMetaclass):
+
     """
     Allows users to login with username/email and password.
     """

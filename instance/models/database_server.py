@@ -351,7 +351,8 @@ class MongoDBServer(DatabaseServer):
         MongoDBReplicaSet,
         null=True,
         blank=True,
-        help_text="Replica Set to which the server belongs."
+        help_text="Replica Set to which the server belongs.",
+        on_delete=models.PROTECT,  # FIXME check whether we want PROTECT or other
     )
     primary = models.BooleanField(
         default=False,
