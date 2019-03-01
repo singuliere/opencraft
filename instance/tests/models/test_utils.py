@@ -25,11 +25,13 @@ import json
 from unittest import TestCase
 from unittest.mock import Mock
 
+from ddt import ddt, data, unpack
 from django.db import models
 
 import consul
 
 from instance.models.utils import (
+    get_base_playbook_name,
     ResourceState,
     ResourceStateDescriptor,
     ModelResourceStateDescriptor,
@@ -685,8 +687,8 @@ class ConsulAgentTest(TestCase):
         value = 'value'
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, value)
 
         # Put int values
@@ -694,8 +696,8 @@ class ConsulAgentTest(TestCase):
         value = 1  # pylint: disable=redefined-variable-type
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, str(value))
 
         # Put float values
@@ -703,8 +705,8 @@ class ConsulAgentTest(TestCase):
         value = 1.1
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, str(value))
 
         # Put list values
@@ -712,8 +714,8 @@ class ConsulAgentTest(TestCase):
         value = [1, 2, 3, 5]
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
         # Put dict values
@@ -721,8 +723,8 @@ class ConsulAgentTest(TestCase):
         value = {'key': 'value', 'another_key': 12}
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
         # Put other values
@@ -730,8 +732,8 @@ class ConsulAgentTest(TestCase):
         value = False
         agent.put(key, value)
 
-        _, data = self.client.kv.get(key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
     def test_put_with_prefix(self):
@@ -745,8 +747,8 @@ class ConsulAgentTest(TestCase):
         value = 'value'
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, value)
 
         # Put int values
@@ -754,8 +756,8 @@ class ConsulAgentTest(TestCase):
         value = 1  # pylint: disable=redefined-variable-type
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, str(value))
 
         # Put float values
@@ -763,8 +765,8 @@ class ConsulAgentTest(TestCase):
         value = 1.1
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, str(value))
 
         # Put list values
@@ -772,8 +774,8 @@ class ConsulAgentTest(TestCase):
         value = [1, 2, 3, 5]
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
         # Put dict values
@@ -781,8 +783,8 @@ class ConsulAgentTest(TestCase):
         value = {'key': 'value', 'another_key': 12}
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
         # Put other values
@@ -790,8 +792,8 @@ class ConsulAgentTest(TestCase):
         value = False
         agent.put(key, value)
 
-        _, data = self.client.kv.get(prefix + key)
-        fetched_value = data['Value'].decode()
+        _, test_data = self.client.kv.get(prefix + key)
+        fetched_value = test_data['Value'].decode()
         self.assertEqual(fetched_value, json.dumps(value))
 
     def test_delete_no_prefix(self):
@@ -898,3 +900,28 @@ class ConsulAgentTest(TestCase):
 
     def tearDown(self):
         self.client.kv.delete('', recurse=True)
+
+
+@ddt
+class PlaybookNameSelectorTestCase(TestCase):
+    """
+    Checks if get_base_playbook_name returns correct values
+    """
+    @data(
+        # Old playbook name
+        ('open-release/ginkgo.1', 'playbooks/edx_sandbox.yml'),
+        ('opencraft-release/ginkgo.2', 'playbooks/edx_sandbox.yml'),
+        ('open-release/hawthorn.1', 'playbooks/edx_sandbox.yml'),
+        ('opencraft-release/hawthorn.2', 'playbooks/edx_sandbox.yml'),
+        # New playbook name and defaults
+        ('', 'playbooks/openedx_native.yml'),
+        ('master', 'playbooks/openedx_native.yml'),
+        ('open-release/ironwood.master', 'playbooks/openedx_native.yml'),
+        ('opencraft-release/ironwood.master', 'playbooks/openedx_native.yml'),
+    )
+    @unpack
+    def test_get_base_playbook_name(self, openedx_release, playbook_name):
+        """
+        Test the overloaded comparison operators
+        """
+        self.assertEqual(get_base_playbook_name(openedx_release), playbook_name)
